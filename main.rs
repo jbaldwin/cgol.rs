@@ -10,14 +10,51 @@ fn print_usage(program_name: &str, _opts: &[Opt]) {
 	println("  -h | -help\t-> Print this help message");
 }
 
-fn load(file: &path::Path) -> ~[~str] {
+/**
+* Loads the input grid file.
+* File format is line delmited '0's and '1's.
+* 1 = The square is true|on in the game of life.
+* 0 = The square is false|off in the game of life.
+**/
+fn load(file: &path::Path) -> ~[~[bool]] {
 
 	let read_result = io::file_reader(file);
-	if read_result.is_ok() {
-		return read_result.unwrap().read_lines();
+
+	let lines = match read_result {
+		Ok(file) => file.read_lines(),
+		Err(e) => {
+			fail!(fmt!("Error reading input grid file: %?", e))
+		}
+	};
+
+	let mut grid: ~[~[bool]] = ~[];
+
+	for lines.iter().advance() |line: &~str| {
+		let mut next: ~[bool] = ~[];
+		for line.iter().advance() |c| {
+			let b: bool = match c {
+				'0' => false,
+				'1' => true,
+				_ => fail!(fmt!("Error parsing input grid file: %c is not valid, 0 or 1 only.", c))
+			};
+			next.push(b)
+		}
+		grid.push(next);
 	}
 
-	fail!(fmt!("Error reading input grid file: %?", read_result.unwrap_err()));
+	return grid;
+}
+
+fn print_grid(grid: ~[~[bool]]) {
+	for grid.iter().advance() |row| {
+		for row.iter().advance() |b| {
+			print(fmt!("%c", match b {
+				&false => '0',
+				&true => '1'
+			}));
+		}
+		println("");
+	}
 }
 
 fn main() {
@@ -48,9 +85,6 @@ fn main() {
 
 	let input: &str = opt_str(&opt_matches, "i");
 	let input_path = ~path::Path(input);
-	let grid: ~[~str] = load(input_path);
-
-	for grid.iter().advance() |line| {
-		println(*line);
-	}
+	let grid: ~[~[bool]] = load(input_path);
+	print_grid(grid);
 }
