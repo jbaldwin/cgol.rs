@@ -45,7 +45,7 @@ fn load(file: &path::Path) -> ~[~[bool]] {
 	return grid;
 }
 
-fn print_grid(grid: ~[~[bool]]) {
+fn print_grid(grid: &[~[bool]]) {
 	for grid.iter().advance() |row| {
 		for row.iter().advance() |b| {
 			print(fmt!("%c", match b {
@@ -56,6 +56,91 @@ fn print_grid(grid: ~[~[bool]]) {
 		println("");
 	}
 }
+
+fn copy_grid(src: &mut[~[bool]], dst: &mut[~[bool]]) {
+	let mut row_num = 0;
+	for src.iter().advance() |row| {
+		let mut col_num = 0;
+		for row.iter().advance() |value| {
+			dst[row_num][col_num] = *value;
+			col_num += 1;
+		}
+		row_num += 1;
+	}
+}
+
+fn alive(currently_alive: bool, neighbours_alive: int) -> bool {
+
+	match currently_alive {
+		true => match neighbours_alive {
+			2 | 3 => true,	// Rule #2
+			_ => false		// Rules #1, #3
+		},
+		false => match neighbours_alive {
+			3 => true,		// Rule #4
+			_ => false
+		}
+	}
+}
+
+fn game_of_life(grid: &mut[~[bool]],  next: &mut[~[bool]]) {
+	/*
+	* Rules
+	* 1) Any live cell with fewer than two live neighbours dies.
+	* 2) Any live cell with two or three live neighbours lives.
+	* 3) Any live cell with more than three live neighbours dies.
+	* 4) Any dead cell with exactly three live neighbours becomes a live cell.
+	*/
+
+	let neighbours = ~[
+		[-1, -1],
+		[ 0, -1],
+		[ 1, -1],
+		[-1,  0],
+		[ 1,  0],
+		[-1,  1],
+		[ 0,  1],
+		[ 1,  1]
+	];
+		
+	let mut col = 0;
+	while col < grid.len() {
+		
+		let mut row = 0;
+		while row < grid[col].len() {
+			
+			let mut n = 0;
+			let mut count = 0;
+			// check all neighbors
+			while(n < neighbours.len()) {
+
+				let x = neighbours[n][0] + col;
+				let y = neighbours[n][1] + row;
+
+				// check boundaries, if the cell is alive up the count
+				if x > 0 && x < grid.len() && y > 0 && y < grid[col].len() {
+					count += match grid[x][y] {
+						true => 1,
+						false => 0
+					};
+				}
+
+				// stop counting, the cell is dead
+				if count >= 4 {
+					break;
+				}
+
+				n += 1;
+			}
+
+			next[col][row] = alive(grid[col][row], count);
+
+			row += 1;
+		}
+		col += 1;
+	}
+}
+
 
 fn main() {
 
@@ -85,6 +170,18 @@ fn main() {
 
 	let input: &str = opt_str(&opt_matches, "i");
 	let input_path = ~path::Path(input);
-	let grid: ~[~[bool]] = load(input_path);
+	let mut grid: ~[~[bool]] = load(input_path);
+	let mut next: ~[~[bool]] = grid.clone();
+
 	print_grid(grid);
+	println("");
+
+	loop {
+		let user = io::stdin();
+		game_of_life(grid, next);
+		print_grid(next);
+		copy_grid(next, grid);	// copy into grid
+		user.read_line();
+	}
 }
+
