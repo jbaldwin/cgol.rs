@@ -86,7 +86,8 @@ impl Grid {
 			}
 		}
 
-		self.copy_back();
+		// set curr to next and next to curr for quick buffer swapping
+		self.swap_buffers();
 	}
 
 	/**
@@ -146,11 +147,11 @@ impl Grid {
 		   { true } else { false }
 	}
 
-	fn copy_back(&mut self) {
-		for int::range(0, self.width()) |i| {
-			for int::range(0, self.height()) |j| {
-				self.curr[i][j].state = self.next[i][j].state;
-			}
+	fn swap_buffers(&mut self) {
+		unsafe {
+			std::ptr::swap_ptr(
+				std::ptr::to_mut_unsafe_ptr(&mut self.curr), 
+				std::ptr::to_mut_unsafe_ptr(&mut self.next));
 		}
 	}
 }
