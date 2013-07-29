@@ -80,6 +80,10 @@ fn alive(currently_alive: bool, neighbours_alive: int) -> bool {
 	}
 }
 
+fn in_bounds(x: int, y: int, width: int, height: int) -> bool {
+	if x >= 0 && x < width && y >= 0 && y < height { true } else { false }
+}
+
 fn game_of_life(grid: &mut[~[bool]],  next: &mut[~[bool]]) {
 	/*
 	* Rules
@@ -89,7 +93,7 @@ fn game_of_life(grid: &mut[~[bool]],  next: &mut[~[bool]]) {
 	* 4) Any dead cell with exactly three live neighbours becomes a live cell.
 	*/
 
-	let neighbours = ~[
+	let neighbours = [
 		[-1, -1],
 		[ 0, -1],
 		[ 1, -1],
@@ -99,42 +103,27 @@ fn game_of_life(grid: &mut[~[bool]],  next: &mut[~[bool]]) {
 		[ 0,  1],
 		[ 1,  1]
 	];
-		
-	let mut col = 0;
-	while col < grid.len() {
-		
-		let mut row = 0;
-		while row < grid[col].len() {
-			
-			let mut n = 0;
+
+	for int::range(0, grid.len() as int) |row| {
+		for int::range(0, grid[row].len() as int) |col| {
 			let mut count = 0;
-			// check all neighbors
-			while(n < neighbours.len()) {
 
-				let x = neighbours[n][0] + col;
-				let y = neighbours[n][1] + row;
+			for int::range(0, neighbours.len() as int) |n| {
+				let x = neighbours[n][0] + row;
+				let y = neighbours[n][1] + col;
 
-				// check boundaries, if the cell is alive up the count
-				if x > 0 && x < grid.len() && y > 0 && y < grid[col].len() {
-					count += match grid[x][y] {
+				if in_bounds(x, y, grid.len() as int, grid[row].len() as int) {
+					count +=  match grid[x][y] {
 						true => 1,
 						false => 0
 					};
 				}
 
 				// stop counting, the cell is dead
-				if count >= 4 {
-					break;
-				}
-
-				n += 1;
+				if count >= 4 { break; }
 			}
-
-			next[col][row] = alive(grid[col][row], count);
-
-			row += 1;
+			next[row][col] = alive(grid[row][col], count);
 		}
-		col += 1;
 	}
 }
 
