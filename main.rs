@@ -1,9 +1,13 @@
 extern mod extra;
+
 use std::os;
 use std::path;
 use std::io;
 use std::int;
 use extra::getopts::*;
+
+mod util;
+
 
 fn print_usage(program_name: &str, _opts: &[Opt]) {
 	println(fmt!("Usage: %s [options]", program_name));
@@ -50,15 +54,15 @@ fn print_grid(grid: &[~[bool]]) {
 	for grid.iter().advance() |row| {
 		for row.iter().advance() |b| {
 			print(fmt!("%c", match b {
-				&false => '0',
-				&true => '1'
+				&false => '-',
+				&true => '*'
 			}));
 		}
 		println("");
 	}
 }
 
-fn copy_grid(src: &mut[~[bool]], dst: &mut[~[bool]]) {
+fn copy_grid(src: &[~[bool]], dst: &mut[~[bool]]) {
 	for int::range(0, src.len() as int) |i| {
 		for int::range(0, src[i].len() as int) |j| {
 			dst[i][j] = src[i][j];
@@ -84,7 +88,7 @@ fn in_bounds(x: int, y: int, width: int, height: int) -> bool {
 	if x >= 0 && x < width && y >= 0 && y < height { true } else { false }
 }
 
-fn game_of_life(grid: &mut[~[bool]],  next: &mut[~[bool]]) {
+fn game_of_life_step(grid: &mut[~[bool]],  next: &mut[~[bool]]) {
 	/*
 	* Rules
 	* 1) Any live cell with fewer than two live neighbours dies.
@@ -159,15 +163,17 @@ fn main() {
 	let mut grid: ~[~[bool]] = load(input_path);
 	let mut next: ~[~[bool]] = grid.clone();
 
+	util::clear();
 	print_grid(grid);
-	println("");
+	util::sleep(500);
 
 	loop {
-		let user = io::stdin();
-		game_of_life(grid, next);
+		util::clear();
+		//let user = io::stdin();
+		game_of_life_step(grid, next);
 		print_grid(next);
 		copy_grid(next, grid);
-		user.read_line();
+		//user.read_line();
+		util::sleep(500);
 	}
 }
-
