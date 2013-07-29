@@ -2,6 +2,7 @@ extern mod extra;
 use std::os;
 use std::path;
 use std::io;
+use std::int;
 use extra::getopts::*;
 
 fn print_usage(program_name: &str, _opts: &[Opt]) {
@@ -58,14 +59,10 @@ fn print_grid(grid: &[~[bool]]) {
 }
 
 fn copy_grid(src: &mut[~[bool]], dst: &mut[~[bool]]) {
-	let mut row_num = 0;
-	for src.iter().advance() |row| {
-		let mut col_num = 0;
-		for row.iter().advance() |value| {
-			dst[row_num][col_num] = *value;
-			col_num += 1;
+	for int::range(0, src.len() as int) |i| {
+		for int::range(0, src[i].len() as int) |j| {
+			dst[i][j] = src[i][j];
 		}
-		row_num += 1;
 	}
 }
 
@@ -180,7 +177,7 @@ fn main() {
 		let user = io::stdin();
 		game_of_life(grid, next);
 		print_grid(next);
-		copy_grid(next, grid);	// copy into grid
+		copy_grid(next, grid);
 		user.read_line();
 	}
 }
