@@ -7,6 +7,7 @@ extern mod extra;
 use std::path;
 use std::io;
 use std::int;
+//use std::task::spawn;
 
 pub enum CellState {
 	Alive,
@@ -52,15 +53,15 @@ impl Grid {
 		* 4) Any dead cell with exactly three live neighbours becomes a live cell.
 		*/
 
-		let neighbours = [
-			[-1, -1],
-			[ 0, -1],
-			[ 1, -1],
-			[-1,  0],
-			[ 1,  0],
-			[-1,  1],
-			[ 0,  1],
-			[ 1,  1]
+		static neighbours: &'static [&'static [int]] = &[
+			&[-1, -1],
+			&[ 0, -1],
+			&[ 1, -1],
+			&[-1,  0],
+			&[ 1,  0],
+			&[-1,  1],
+			&[ 0,  1],
+			&[ 1,  1]
 		];
 
 		for int::range(0, self.width()) |row| {
@@ -75,7 +76,6 @@ impl Grid {
 						count +=  match self.curr[x][y].state {
 							Dead => 0,
 							Alive => 1,
-							
 						};
 					}
 
@@ -88,6 +88,18 @@ impl Grid {
 
 		// set curr to next and next to curr for quick buffer swapping
 		self.swap_buffers();
+	}
+
+	pub fn print(&self) {
+		for self.curr.iter().advance() |row| {
+			for row.iter().advance() |cell| {
+				print(fmt!("%c", match cell.state {
+					Dead => '-',
+					Alive => '*'
+				}));
+			}
+			println("");
+		}
 	}
 
 	/**
@@ -126,19 +138,6 @@ impl Grid {
 		}
 
 		return g;
-	}
-
-
-	pub fn print(&self) {
-		for self.curr.iter().advance() |row| {
-			for row.iter().advance() |cell| {
-				print(fmt!("%c", match cell.state {
-					Dead => '-',
-					Alive => '*'
-				}));
-			}
-			println("");
-		}
 	}
 
 	fn in_bounds(&self, x: int, y: int) -> bool {

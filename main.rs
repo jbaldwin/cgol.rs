@@ -3,6 +3,8 @@ extern mod extra;
 use std::os;
 use std::path;
 use extra::getopts::*;
+use grid::Grid;
+use util::{sleep, clear};
 
 mod util;
 mod grid;
@@ -41,18 +43,16 @@ fn main() {
 
 	let input: &str = opt_str(&opt_matches, "i");
 	let input_path = ~path::Path(input);
-	let mut g: ~grid::Grid = grid::Grid::load(input_path);
+	let mut g: ~Grid = Grid::load(input_path);
 
-	util::clear();
+	clear();
 	g.print();
-	util::sleep(500);
+	sleep(500);
 
 	loop {
-		util::clear();
-		//let user = io::stdin();
+		clear();
 		g.step();
 		g.print();
-		//user.read_line();
-		util::sleep(500);
+		sleep(500);
 	}
 }
