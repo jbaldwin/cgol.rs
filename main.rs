@@ -4,7 +4,8 @@ use std::os;
 use std::path;
 use extra::getopts::*;
 use grid::Grid;
-use util::{sleep, clear};
+use util::console;
+use util::thread;
 
 mod util;
 mod grid;
@@ -45,14 +46,14 @@ fn main() {
 	let input_path = ~path::Path(input);
 	let mut g: ~Grid = Grid::load(input_path);
 
-	clear();
+	console::clear();
 	g.print();
-	sleep(500);
+	thread::sleep(500);
 
 	loop {
-		clear();
+		console::clear();
 		g.step();
 		g.print();
-		sleep(500);
+		thread::sleep(500);
 	}
 }
