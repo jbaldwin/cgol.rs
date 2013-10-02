@@ -3,7 +3,7 @@ extern mod extra;
 use std::os;
 use std::path;
 use extra::getopts::*;
-use grid::Grid;
+use grid::{Grid, Printable};
 use util::console;
 use util::thread;
 
@@ -11,7 +11,7 @@ mod util;
 mod grid;
 
 fn print_usage(program_name: &str, _opts: &[Opt]) {
-	println(fmt!("Usage: %s [options]", program_name));
+	println!("Usage: {:s} [options]", program_name);
 	println("  -i\t\t-> Path to input file");
 	println("  -h | -help\t-> Print this help message");
 }
@@ -33,16 +33,21 @@ fn main() {
 		Err(f) => { 
 			print_usage(program_name, opts);
 			println("");
-			fail!(fail_str(f))
+			fail!(f.to_err_msg());
 		}
 	};
 
-	if opt_present(&opt_matches, "h") || opt_present(&opt_matches, "help") {
+	if opt_matches.opt_present("h") ||
+	   opt_matches.opt_present("help") {
 		print_usage(program_name, opts);
 		return;
 	}
 
-	let input: &str = opt_str(&opt_matches, "i");
+	let input: &str = match opt_matches.opt_str("i") {
+		Some(s) => s,
+		None => fail!("Option -i not provided a value.")
+	};
+
 	let input_path = ~path::Path(input);
 	let mut g: ~Grid = Grid::load(input_path);
 

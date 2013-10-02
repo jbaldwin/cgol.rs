@@ -6,8 +6,12 @@ extern mod extra;
 
 use std::path;
 use std::io;
-use std::int;
+use std::iter;
 //use std::task::spawn;
+
+pub trait Printable {
+	fn print(&self);
+}
 
 pub enum CellState {
 	Alive,
@@ -15,7 +19,7 @@ pub enum CellState {
 }
 
 pub struct Cell {
-	pub state: CellState
+	state: CellState
 }
 
 impl Cell {
@@ -64,11 +68,11 @@ impl Grid {
 			&[ 1,  1]
 		];
 
-		for int::range(0, self.width()) |row| {
-			for int::range(0, self.height()) |col| {
+		for row in iter::range(0, self.width()) {
+			for col in iter::range(0, self.height()) {
 				let mut count = 0;
 
-				for int::range(0, neighbours.len() as int) |n| {
+				for n in iter::range(0, neighbours.len() as int) {
 					let x = neighbours[n][0] + row;
 					let y = neighbours[n][1] + col;
 
@@ -90,18 +94,6 @@ impl Grid {
 		self.swap_buffers();
 	}
 
-	pub fn print(&self) {
-		for self.curr.iter().advance() |row| {
-			for row.iter().advance() |cell| {
-				print(fmt!("%c", match cell.state {
-					Dead => '-',
-					Alive => '*'
-				}));
-			}
-			println("");
-		}
-	}
-
 	/**
 	* Loads the input grid file.
 	* File format is line delmited '0's and '1's.
@@ -121,10 +113,10 @@ impl Grid {
 
 		let mut g: ~Grid = ~Grid { curr: ~[], next: ~[] };
 
-		for lines.iter().advance() |line: &~str| {
+		for line in lines.iter() {
 			let mut row1: ~[Cell] = ~[];
 			let mut row2: ~[Cell] = ~[];
-			for line.iter().advance() |c| {
+			for c in line.iter() {
 				let cell: Cell = match c {
 					'0' => Cell { state: Dead },
 					'1' => Cell { state: Alive },
@@ -151,6 +143,20 @@ impl Grid {
 			std::ptr::swap_ptr(
 				std::ptr::to_mut_unsafe_ptr(&mut self.curr), 
 				std::ptr::to_mut_unsafe_ptr(&mut self.next));
+		}
+	}
+}
+
+impl Printable for Grid {
+	fn print(&self) {
+		for row in self.curr.iter() {
+			for cell in row.iter() {
+				print(fmt!("%c", match cell.state {
+					Dead => '-',
+					Alive => '*'
+				}));
+			}
+			println("");
 		}
 	}
 }
