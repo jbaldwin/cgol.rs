@@ -2,7 +2,8 @@ extern mod extra;
 
 use std::os;
 use std::path;
-use extra::getopts::*;
+#[feature(globs)]
+use extra::getopts::{getopts, reqopt, optflag, Opt};
 use grid::{Grid, Printable};
 use util::console;
 use util::thread;

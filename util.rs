@@ -12,7 +12,7 @@ pub mod thread {
 pub mod console {
 	extern mod std;
 
-	use std::libc::funcs::c95::stdlib::*;
+	use std::libc::funcs::c95::stdlib::system;
 
 	#[fixed_stack_segment]
 	pub fn clear() {
